@@ -1,0 +1,12 @@
+albumentations==0.5.2
+git-python==1.0.3
+matplotlib==3.3.3
+natsort==7.1.0
+numpy==1.18.5
+opencv-python==4.1.1.26                                  
+scipy==1.5.4               
+segmentation-models-pytorch==0.1.2
+tensorboard==2.4.0
+tensorflow==2.3.1        
+torch==1.7.0              
+torchvision==0.8.1
