@@ -1,11 +1,36 @@
+"""
+Visualization functions
+"""
+
+import typing
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
 
 
 class SegmentationViewer:
-    def __init__(self, dataset, title="Segmentation viewer",
-                 prob_threshold=0.5):
+    """
+    Viewer of segmentation datasets or results. It shows a slider
+    for navigating the images and another one for adjusting the
+    blending between background and foreground.
+    """
+
+    def __init__(self, dataset: typing.Union[
+            torch.utils.data.Dataset, typing.List],
+            title="Segmentation viewer",
+            prob_threshold=0.5):
+        """
+        Setups the viewer.
+
+        Args:
+
+            dataset: Wrapped dataset.
+            title: Window title
+            prob_threshold: Probability threshold to whatever show or not
+             the prediction.
+        """
         self.dataset = dataset
         self.title = title
         self.canvas = None
@@ -19,7 +44,8 @@ class SegmentationViewer:
             return self._last_item
 
         self._last_index = idx
-        self._last_item = self.dataset[idx]
+        self._last_item = self.dataset[
+            min(idx, len(self.dataset) - 1)]
         return self._last_item
 
     def _update_image(self, _):
@@ -28,7 +54,7 @@ class SegmentationViewer:
         item_idx = cv2.getTrackbarPos('Seek', self.title)
         item = self._get_dataset_item(item_idx)
         rgb_image = item.rgb_image
-        
+
         self.canvas = rgb_image.copy()
         heatmap = plt.get_cmap("plasma", 100)(item.mask_image)
         heatmap = (heatmap[:, :, :3]*255).astype(np.uint8)
@@ -47,7 +73,7 @@ class SegmentationViewer:
         cv2.namedWindow(self.title, cv2.WINDOW_NORMAL)
 
         cv2.createTrackbar('Seek', self.title, 0,
-                           len(self.dataset) - 1,
+                           len(self.dataset),
                            self._update_image)
         cv2.createTrackbar('Blending', self.title, 50,
                            100, self._update_image)

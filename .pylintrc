@@ -1,0 +1,14 @@
+[pylint]
+good-names = i,j,x,to,g
+output-format = colorized
+max-line-length = 100
+extension-pkg-whitelist = torch,cv2,numpy
+ignored-modules = numpy, PurePath
+ignored-classes = numpy, PurePath
+generated-members=torch.*
+disable = fixme, 
+  too-many-instance-attributes, 
+  too-few-public-methods, 
+  too-many-arguments,
+  too-many-locals,
+  bare-except
