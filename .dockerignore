@@ -1,0 +1,17 @@
+dataset
+venv
+.git
+**/*.lmdb
+runs
+
+**/__pycache__
+**/*.egg-info
+**/*.pyc
+**/*.gv.png
+**/*.torch
+install_manifest.txt
+dist
+Dockerfile
+docker.mk
+
+README.md

@@ -1,7 +1,8 @@
 """
 Workflow for training image segmentation models
-to segment plants from the LEAF COUNTING CHALLENGE.
-"""
+to segment plants from the Leaf Segmentation Challenge (LSC).
+
+ci"""
 
 import typing
 
@@ -12,7 +13,8 @@ import rflow
 
 class LoadDataset(rflow.Interface):
     """
-    Load a plant segmentation dataset.
+    Load a plant segmentation dataset in the 
+    LEAF COUNTING CHALLENGE format.
     """
 
     def evaluate(self, resource: rflow.FSResource):
@@ -113,7 +115,7 @@ def data(g):
     g.dataset = LoadDataset(rflow.FSResource(
         "dataset/plant-phenotyping/CVPPP2017_LCC_training/training"))
 
-    g.dataset_split = SplitDataset(rflow.FSResource("dataset-split.pkl"))
+    g.dataset_split = SplitDataset(rflow.FSResource("dataset/dataset-split.pkl"))
     with g.dataset_split as args:
         args.dataset = g.dataset
         args.train_size = 0.9
