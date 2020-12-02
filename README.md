@@ -1,4 +1,4 @@
-# Plant Segmentation Experiments
+# Plant Segmentation Experiments - WIP
 
 This is a simple project to demonstrate how to use RFlow to create a
 simple semantic segmentation experiment.
