@@ -5,6 +5,8 @@ The goal is to segment leaves from the [LEAF SEGMENTATION AND COUNTING CHALLENGE
 For simplicity, this sample does not count the leaves.
 We evaluate 4 kinds of architectures: UNet (Resnet32), UNet (mobilenet), FPN (Resnet32) and Linknet (Resnet32), supplied by the [Segmentation Models Pytorch (SMP)](https://github.com/qubvel/segmentation_models.pytorch)
 
+![](./sample-predict.jpg)
+
 The workflows are coded on the `workflow.py` file. The `data` workflow for loading and splitting the image set:
 
 ![](./data.gv.png)
@@ -12,6 +14,7 @@ The workflows are coded on the `workflow.py` file. The `data` workflow for loadi
 * `dataset`: Load the dataset from the directory `dataset`.
 * `dataset_split`: Split the dataset into train, validation and test sets.
 * `train_dataset_view`: Opens a viewer to navigate in the train set of images and masks.
+  - Ex.: `rflow data run train_dataset_view`
 * `test_dataset_view`: Opens a viewer to navigate in the test set of images and masks.
 
 The `unet`, `unet_mobilenet`, `fpn` and `linknet` workflows contain the experiments for each architecture. They have the same nodes, the bellow diagram is the one for Unet:
@@ -23,7 +26,9 @@ The `unet`, `unet_mobilenet`, `fpn` and `linknet` workflows contain the experime
 * `model`: Creates the network model for training.
 * `untrain_test`: Opens a viewer with predictions from the model without training. Useful to debug.
 * `train`: Starts training. See the image for the used training parameters.
+  - Ex.: `rflow unet run train`
 * `predict_test_set`: Opens a viewer with predictions using the trained model with images from the test set.
+  - Ex.: `rflow unet run predict_test_set`
 * `predict_image`: Predict using the trained model the segmentation of an arbitrary image passed via the command line, parameter `--sample-image`.
 * `metrics`: Evaluates the trained model with various metrics on the test set.
 

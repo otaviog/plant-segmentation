@@ -4,5 +4,4 @@ runs
 
 __pycache__
 *.egg-info
-*.gv.png
 *.torch
