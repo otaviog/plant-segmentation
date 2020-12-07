@@ -3,11 +3,14 @@ LABEL maintainer="otavio.b.gomes@gmail.com"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt -yq install git graphviz
+RUN apt update && apt -yq install git graphviz libgtk2.0
 
 WORKDIR /workspace
 ADD requirements.txt .
 RUN pip install -r requirements.txt
+
+RUN pip uninstall -y opencv-python-headless
+RUN pip install opencv-python==4.1.1.26
 
 ADD . plant-segmentation
 RUN pip install -e plant-segmentation/module

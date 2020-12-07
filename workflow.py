@@ -1,8 +1,7 @@
 """
 Workflow for training image segmentation models
 to segment plants from the Leaf Segmentation Challenge (LSC).
-
-ci"""
+"""
 
 import typing
 
@@ -13,7 +12,7 @@ import rflow
 
 class LoadDataset(rflow.Interface):
     """
-    Load a plant segmentation dataset in the 
+    Load a plant segmentation dataset in the
     LEAF COUNTING CHALLENGE format.
     """
 
@@ -113,9 +112,10 @@ def data(g):
     Graph width dataset loading and split.
     """
     g.dataset = LoadDataset(rflow.FSResource(
-        "dataset/plant-phenotyping/CVPPP2017_LCC_training/training"))
+        "dataset/CVPPP2017_LCC_training/training"))
 
-    g.dataset_split = SplitDataset(rflow.FSResource("dataset/dataset-split.pkl"))
+    g.dataset_split = SplitDataset(
+        rflow.FSResource("dataset/dataset-split.pkl"))
     with g.dataset_split as args:
         args.dataset = g.dataset
         args.train_size = 0.9
@@ -139,7 +139,7 @@ class AugmentDataset(rflow.Interface):
         Factory the augmentated dataset.
 
         Args:
-            dataset (:obj:`torch.data.utils.Dataset`): Any 
+            dataset (:obj:`torch.data.utils.Dataset`): Any
              segmentation item dataset.
             crop_width: Augmentation crop width.
             crop_height: Augmentation crop height.
@@ -262,13 +262,20 @@ class ViewImagePrediction(rflow.Interface):
 
 
 class EvaluateMetrics(rflow.Interface):
+    """
+    Compute various evaluation metrics for test sets.
+    """
     def non_collateral(self):
         return ["batch_size", "device", "num_workers"]
 
     def evaluate(self, dataset, model, preprocessing,
+                 name,
                  prob_threshold=0.5,
                  batch_size=4,
                  device="cuda:0", num_workers=4):
+        """
+        Computes the metrics.
+        """
         from functools import partial
         import segmentation_models_pytorch as smp
         from torch.utils.data import DataLoader
@@ -292,8 +299,11 @@ class EvaluateMetrics(rflow.Interface):
             batch_size, collate_fn=collate_fn,
             num_workers=num_workers,
             shuffle=False))
+        del val_metrics['dice_loss']
+
         print(val_metrics)
         self.save_measurement(val_metrics)
+        return (name, val_metrics)
 
 
 def _make_experiment(g, model_node,
@@ -343,7 +353,7 @@ def _make_experiment(g, model_node,
     with g.predict_image as args:
         args.image_path = rflow.UserArgument(
             "--sample-image",
-            default="dataset/resources/49592690973_35154a72d4_b.jpg")
+            default="dataset/resources/640px-Arabidopsis_Thaliana_planted_in_Laboratory.jpeg")
         args.model = g.train
         args.preprocessing = preprocessing
 
@@ -352,6 +362,7 @@ def _make_experiment(g, model_node,
         args.dataset = data_g.dataset_split[2]
         args.model = g.train
         args.preprocessing = preprocessing
+        args.name = g.name
 
 
 class CreateModel(rflow.Interface):
@@ -359,9 +370,18 @@ class CreateModel(rflow.Interface):
     Node to factory segmentation_models_pytorch models.
     """
 
-    def evaluate(self, architecture="FPN", encoder="se_resnext50_32x4d",
+    def evaluate(self, architecture="FPN", encoder="resnet34",
                  encoder_weights="imagenet", activation="sigmoid",
                  resize_width=224, resize_height=224):
+        """
+        Args:
+
+            architecture (str): One of the followings: "FPN", "UNET".
+            encoder_weights (str): Any encoder supported by SMP.
+            activation (str): Any SMP activation.
+            resize_width (int): Preprocessing image resize width.
+            resize_height (int): Preprocessing image resize height.
+        """
         import segmentation_models_pytorch as smp
 
         from plantseg.inference import Preprocessing
@@ -378,8 +398,15 @@ class CreateModel(rflow.Interface):
                 encoder_weights=encoder_weights,
                 classes=1,
                 activation=activation)
+        elif architecture == "Linknet":
+            model = smp.Linknet(
+                encoder_name=encoder,
+                encoder_weights=encoder_weights,
+                classes=1,
+                activation=activation)
         else:
             raise RuntimeError(f"Undefined architecture {architecture}")
+
         preproc_fun = smp.encoders.get_preprocessing_fn(
             encoder, encoder_weights)
 
@@ -388,14 +415,12 @@ class CreateModel(rflow.Interface):
 
 @rflow.graph()
 def fpn(g):
-    g.model = CreateModel()
-    _make_experiment(g, g.model, 256, 256)
-
-
-@rflow.graph()
-def fpn_resnet(g):
+    """
+    Experiment using the FPN achitecture with resnet34.
+    """
     g.model = CreateModel()
     with g.model as args:
+        args.architecture = "UNet"
         args.encoder = "resnet34"
 
     _make_experiment(g, g.model, 256, 256)
@@ -403,9 +428,86 @@ def fpn_resnet(g):
 
 @rflow.graph()
 def unet(g):
+    """
+    Experiment using the UNET achitecture with resnet34.
+    """
     g.model = CreateModel()
     with g.model as args:
         args.architecture = "UNet"
         args.encoder = "resnet34"
 
-    _make_experiment(g, g.model, 224, 224)
+    _make_experiment(g, g.model, 256, 256)
+
+
+@rflow.graph()
+def unet_mobilenet(g):
+    """
+    Experiment using the UNET achitecture and mobilenet_v2
+    """
+    g.model = CreateModel()
+    with g.model as args:
+        args.architecture = "UNet"
+        args.encoder = "mobilenet_v2"
+
+    _make_experiment(g, g.model, 256, 256)
+
+
+@rflow.graph()
+def linknet(g):
+    """
+    Experiment using the Linknet achitecture with resnet34
+    """
+    g.model = CreateModel()
+    with g.model as args:
+        args.architecture = "Linknet"
+        args.encoder = "resnet34"
+
+    _make_experiment(g, g.model, 256, 256)
+
+
+class ReportAll(rflow.Interface):
+    """Report metrics
+    """
+
+    def evaluate(self, metrics1=None, metrics2=None, metrics3=None,
+                 metrics4=None):
+        """
+        Summarizes the metrics into a table.
+        """
+        from pytablewriter import MarkdownTableWriter
+
+        metrics = [mtc for mtc in [metrics1, metrics2, metrics3,
+                                   metrics4]
+                   if mtc is not None]
+
+        method_names = [mtc[0] for mtc in metrics]
+        metric_dicts = [mtc[1] for mtc in metrics]
+
+        metric_names = metric_dicts[0].keys()
+
+        headers = [""] + method_names
+        value_matrix = []
+        for name in metric_names:
+            value_row = [name] + [mdict[name] for mdict in metric_dicts]
+            value_matrix.append(value_row)
+
+        writer = MarkdownTableWriter(
+            table_name="Report",
+            headers=headers,
+            value_matrix=value_matrix)
+        writer.write_table()
+
+
+@rflow.graph()
+def report(g):
+    """
+    Reports the result of all experiments in a table.
+    """
+    g.all = ReportAll()
+
+    with g.all as args:
+        # Currently, this is the only way to pass variable number of nodes.
+        args.metrics1 = rflow.open_graph(".", "unet").metrics
+        args.metrics2 = rflow.open_graph(".", "unet_mobilenet").metrics
+        args.metrics3 = rflow.open_graph(".", "fpn").metrics
+        args.metrics4 = rflow.open_graph(".", "linknet").metrics

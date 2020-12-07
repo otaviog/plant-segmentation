@@ -1,7 +1,6 @@
 *.pkl
 *.lmdb
 runs
-dataset/*
 
 __pycache__
 *.egg-info

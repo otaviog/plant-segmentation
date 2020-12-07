@@ -62,8 +62,9 @@ class SegmentationPredictor:
         with torch.no_grad():
             mask_image = self.model(rgb_tensor)
 
-        mask_image = T.functional.resize(
-            mask_image.squeeze(0).cpu(), (height, width))
+        mask_image = torch.nn.functional.interpolate(
+            mask_image.cpu(), (height, width))
+
         return mask_image.squeeze().numpy()
 
     @property

@@ -56,10 +56,13 @@ class SegmentationViewer:
         rgb_image = item.rgb_image
 
         self.canvas = rgb_image.copy()
-        heatmap = plt.get_cmap("plasma", 100)(item.mask_image)
+
+        mask = item.mask_image.squeeze()
+
+        heatmap = plt.get_cmap("plasma", 100)(mask)
         heatmap = (heatmap[:, :, :3]*255).astype(np.uint8)
 
-        mask = item.mask_image > self.prob_threshold
+        mask = mask > self.prob_threshold
 
         self.canvas[mask] = (rgb_image[mask]*(1.0 - alpha)
                              + heatmap[mask]*alpha).astype(np.uint8)
