@@ -27,7 +27,7 @@ jobs:
         pip install -r requirements.txt
         pip install opencv-python==4.4.0.46
         pip install -r requirements-dev.txt
-        pip install module
+        pip install ./module
     - name: Lint with pylint
       run: |
         # stop the build if there are Python syntax errors or undefined names
