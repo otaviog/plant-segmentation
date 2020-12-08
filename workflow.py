@@ -218,6 +218,15 @@ class ViewDatasetPredictions(rflow.Interface):
 
     def evaluate(self, dataset, model, preprocessing,
                  device="cuda:0"):
+        """
+        Args:
+
+            dataset: A dataset.
+            model: A trained (or not) model.
+            preprocessing: The architecture's preprocessing.
+            device: Which device.
+        """
+
         from plantseg.viz import SegmentationViewer
         from plantseg.inference import (
             SegmentationPredictor, PredictDataset)

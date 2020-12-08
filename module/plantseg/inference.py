@@ -4,7 +4,6 @@ Segmentation inference tools.
 import typing
 
 import torch
-import torchvision.transforms as T
 import numpy as np
 import albumentations
 
