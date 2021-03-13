@@ -32,5 +32,6 @@ $ source activate venv/bin/activate
 # pep8 the code:
 (venv) $ make -f tasks.mk pep8
 ...
+# Tests the ci-build of Github Actions
+$ make -f tasks.mk ci-build
 ```
-
