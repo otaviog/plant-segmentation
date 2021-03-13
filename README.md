@@ -1,7 +1,7 @@
 # Plant Segmentation Experiments
 
 A simple project to demonstrate how to use [RFlow](https://github.com/otaviog/rflow) to create a semantic segmentation experiment. 
-The goal is to segment leaves from the [LEAF SEGMENTATION AND COUNTING CHALLENGES](https://www.plant-phenotyping.org/CVPPP2017-challenge)
+The goal is to segment leaves from the [LEAF SEGMENTATION AND COUNTING CHALLENGES](https://www.plant-phenotyping.org/datasets-home)
 For simplicity, this sample does not count the leaves.
 We evaluate 4 kinds of architectures: UNet (Resnet32), UNet (mobilenet), FPN (Resnet32) and Linknet (Resnet32), supplied by the [Segmentation Models Pytorch (SMP)](https://github.com/qubvel/segmentation_models.pytorch)
 
@@ -45,7 +45,7 @@ The `report` workflow:
 
 # Executing
 
-Download the dataset LEAF COUNTING CHALLENGE (https://www.plant-phenotyping.org/CVPPP2017-challenge), and extract it on the [dataset directory](dataset/). 
+Download the dataset LEAF COUNTING CHALLENGE (https://www.plant-phenotyping.org/datasets-home), and extract it on the [dataset directory](dataset/). 
 The file structure should be as the following:
 
 ```shell
